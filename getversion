@@ -30,13 +30,16 @@ if type git >/dev/null 2>&1 && [ -d '.git' ] ; then
 	fi
 fi
 
-FLAG="${1:-noflag}"
-if [ "$FLAG" = '--short' ] ; then
-    echo "${VERSION}"
-else
-    if [ -f BUILD_NUMBER ] ; then
-        BUILDNUMBER=`cat BUILD_NUMBER`
-    fi
-    echo "${VERSION} build ${BUILDNUMBER}"
-fi
+#FLAG="${1:-noflag}"
+#if [ "$FLAG" = '--short' ] ; then
+#    echo "${VERSION}"
+#else
+#    if [ -f BUILD_NUMBER ] ; then
+#        BUILDNUMBER=`cat BUILD_NUMBER`
+#    fi
+#    echo "${VERSION} build ${BUILDNUMBER}"
+#fi
+
+echo "7.0.0-alpha.0+dev.30.g63d7dc6.build.dev-oss"
+
 popd > /dev/null
