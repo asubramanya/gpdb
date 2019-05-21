@@ -298,6 +298,7 @@ int			optimizer_cost_model;
 bool		optimizer_metadata_caching;
 int			optimizer_mdcache_size;
 bool		optimizer_use_gpdb_allocators;
+bool		optimizer_translate_unused_colrefs;
 
 /* Optimizer debugging GUCs */
 bool		optimizer_print_query;
@@ -2963,6 +2964,17 @@ struct config_bool ConfigureNamesBool_gp[] =
 			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
 		},
 		&optimizer_enable_eageragg,
+		false,
+		NULL, NULL, NULL
+	},
+
+	{
+		{"optimizer_translate_unused_colrefs", PGC_USERSET, QUERY_TUNING_OTHER,
+			gettext_noop("Translate colrefs that are not used in the query"),
+			NULL,
+			GUC_NO_SHOW_ALL | GUC_NOT_IN_SAMPLE
+		},
+		&optimizer_translate_unused_colrefs,
 		false,
 		NULL, NULL, NULL
 	},

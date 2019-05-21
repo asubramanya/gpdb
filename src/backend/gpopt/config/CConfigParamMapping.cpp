@@ -384,7 +384,15 @@ CConfigParamMapping::SConfigMappingElem CConfigParamMapping::m_elements[] =
 		&optimizer_enable_eageragg,
 		false, // m_negate_param
 		GPOS_WSZ_LIT("Enable Eager Agg transform for pushing aggregate below an innerjoin.")
+		},
+
+		{
+		EopttraceTranslateUnusedColrefs,
+		&optimizer_translate_unused_colrefs,
+		false, // m_negate_param
+		GPOS_WSZ_LIT("Translate colrefs that are not used in the query")
 		}
+
 };
 
 //---------------------------------------------------------------------------
