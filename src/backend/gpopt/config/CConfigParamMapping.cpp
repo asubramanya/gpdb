@@ -374,6 +374,13 @@ CConfigParamMapping::SConfigMappingElem CConfigParamMapping::m_elements[] =
 		&optimizer_force_agg_skew_avoidance,
 		false, // m_negate_param
 		GPOS_WSZ_LIT("Always pick a plan for aggregate distinct that minimizes skew.")
+		},
+
+		{
+		EopttraceTranslateUnusedColrefs,
+		&optimizer_translate_unused_colrefs,
+		false, // m_negate_param
+		GPOS_WSZ_LIT("Translate colrefs that are not used in the query")
 		}
 };
 

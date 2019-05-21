@@ -502,6 +502,10 @@ extern bool optimizer_analyze_midlevel_partition;
 
 extern bool optimizer_use_gpdb_allocators;
 
+extern bool optimizer_translate_unused_colrefs;
+
+/* optimizer GUCs for replicated table */
+extern bool optimizer_replicated_table_insert;
 
 /* GUCs for slice table*/
 extern int	gp_max_slices;
