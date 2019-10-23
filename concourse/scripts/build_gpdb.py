@@ -121,6 +121,9 @@ def main():
                                                                os.path.join(INSTALL_DIR, "include")))
     gpBuild.append_configure_options(configure_option)
 
+    status = gpBuild.install_deps()
+    fail_on_error(status)
+
     status = gpBuild.configure()
     fail_on_error(status)
 

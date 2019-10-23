@@ -26,6 +26,10 @@ class GpBuild(GpdbBuildBase):
                                   ]
         self.source_gcc_env_cmd = ''
 
+    def install_deps(self):
+        cmd = "dpkg --install libquicklz-installer/libquicklz-*.deb"
+        self.run_cmd(cmd, None)
+
     def configure(self):
         if self.mode == 'off':
             self.configure_options.append("--disable-orca")
