@@ -569,6 +569,8 @@ namespace gpdb {
 	// check whether a type is composite
 	bool IsCompositeType(Oid typid);
 
+	bool IsTextRelatedType(Oid typid);
+
 	// get integer value from an Integer value node
 	int GetIntFromValue(Node *node);
 

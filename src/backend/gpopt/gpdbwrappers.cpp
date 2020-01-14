@@ -2662,6 +2662,26 @@ gpdb::IsCompositeType
 	return false;
 }
 
+bool
+gpdb::IsTextRelatedType
+	(
+	Oid typid
+	)
+{
+	GP_WRAP_START;
+	{
+		/* catalog tables: pg_type */
+		char typcategory;
+		bool typispreferred;
+		get_type_category_preferred(typid, &typcategory, &typispreferred);
+
+		return typcategory == TYPCATEGORY_STRING;
+	}
+	GP_WRAP_END;
+	return false;
+}
+
+
 int
 gpdb::GetIntFromValue
 	(
