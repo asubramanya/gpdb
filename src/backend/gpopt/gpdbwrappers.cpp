@@ -3278,6 +3278,16 @@ gpdb::HashText(Datum d)
 }
 
 uint32
+gpdb::HashName(Datum d)
+{
+	GP_WRAP_START;
+	{
+		return DatumGetUInt32(DirectFunctionCall1(hashname, d));
+	}
+	GP_WRAP_END;
+}
+
+uint32
 gpdb::UUIDHash(Datum d)
 {
 	GP_WRAP_START;

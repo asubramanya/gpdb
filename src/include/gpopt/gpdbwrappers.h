@@ -666,6 +666,8 @@ namespace gpdb {
 
 	uint32 HashText(Datum d);
 
+	uint32 HashName(Datum d);
+
 	uint32 UUIDHash(Datum d);
 
 	void * GPDBMemoryContextAlloc(MemoryContext context, Size size);
