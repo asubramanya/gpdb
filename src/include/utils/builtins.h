@@ -833,6 +833,7 @@ extern Datum bpchar_smaller(PG_FUNCTION_ARGS);
 extern int	bpchartruelen(char *s, int len);
 extern Datum bpcharlen(PG_FUNCTION_ARGS);
 extern Datum bpcharoctetlen(PG_FUNCTION_ARGS);
+extern Datum hashchar(PG_FUNCTION_ARGS);
 extern Datum hashbpchar(PG_FUNCTION_ARGS);
 extern Datum bpchar_pattern_lt(PG_FUNCTION_ARGS);
 extern Datum bpchar_pattern_le(PG_FUNCTION_ARGS);

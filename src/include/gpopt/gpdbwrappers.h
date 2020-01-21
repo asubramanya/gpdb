@@ -662,6 +662,8 @@ namespace gpdb {
 						   int numsegments);
 
 
+	uint32 HashChar(Datum d);
+
 	uint32 HashBpChar(Datum d);
 
 	uint32 HashText(Datum d);
