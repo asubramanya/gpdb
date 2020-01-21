@@ -2474,6 +2474,10 @@ CTranslatorScalarToDXL::ExtractLintValueFromDatum
 			{
 				hash = gpdb::HashBpChar((Datum) bytes);
 			}
+			else if (mdid->Equals(&CMDIdGPDB::m_mdid_char))
+			{
+				hash = gpdb::HashChar((Datum) bytes);
+			}
 			else if (mdid->Equals(&CMDIdGPDB::m_mdid_name))
 			{
 				hash = gpdb::HashName((Datum) bytes);

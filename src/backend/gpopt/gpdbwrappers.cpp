@@ -3258,6 +3258,16 @@ gpdb::MakeGpPolicy
 }
 
 uint32
+gpdb::HashChar(Datum d)
+{
+	GP_WRAP_START;
+	{
+		return DatumGetUInt32(DirectFunctionCall1(hashchar, d));
+	}
+	GP_WRAP_END;
+}
+
+uint32
 gpdb::HashBpChar(Datum d)
 {
 	GP_WRAP_START;
