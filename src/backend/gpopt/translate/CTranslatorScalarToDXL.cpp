@@ -2177,7 +2177,7 @@ CTranslatorScalarToDXL::TranslateGenericDatumToDXL
 		lint_value = ExtractLintValueFromDatum(md_type, is_null, bytes, length);
 	}
 
-	return CMDTypeGenericGPDB::CreateDXLDatumVal(mp, mdid, type_modifier, is_null, bytes, length, lint_value, double_value);
+	return CMDTypeGenericGPDB::CreateDXLDatumVal(mp, mdid, md_type, type_modifier, is_null, md_type->IsTextRelated(), bytes, length, lint_value, double_value);
 }
 
 
