@@ -2219,12 +2219,14 @@ CTranslatorUtils::CreateDXLProjElemConstNULL
 	}
 	else
 	{
+		const IMDType *type = md_accessor->RetrieveType(mdid);
 		datum_dxl = CMDTypeGenericGPDB::CreateDXLDatumVal
 										(
 										mp,
 										mdid,
 										default_type_modifier,
 										true /*fConstNull*/,
+										type->IsTextRelated(),
 										NULL, /*pba */
 										0 /*length*/,
 										0 /*l_value*/,

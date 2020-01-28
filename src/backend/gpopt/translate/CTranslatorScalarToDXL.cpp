@@ -2172,12 +2172,12 @@ CTranslatorScalarToDXL::TranslateGenericDatumToDXL
 	}
 
 	LINT lint_value = 0;
-	if (CMDTypeGenericGPDB::HasByte2IntMapping(md_type))
+	if (md_type->IsTextRelated() || CMDTypeGenericGPDB::HasByte2IntMapping(mdid))
 	{
-		lint_value = ExtractLintValueFromDatum(md_type, is_null, bytes, length);
+		lint_value = ExtractLintValueFromDatum(mdid, is_null, bytes, length);
 	}
 
-	return CMDTypeGenericGPDB::CreateDXLDatumVal(mp, mdid, md_type, type_modifier, is_null, md_type->IsTextRelated(), bytes, length, lint_value, double_value);
+	return CMDTypeGenericGPDB::CreateDXLDatumVal(mp, mdid, type_modifier, is_null, md_type->IsTextRelated(), bytes, length, lint_value, double_value);
 }
 
 
@@ -2432,14 +2432,13 @@ CTranslatorScalarToDXL::ExtractByteArrayFromDatum
 LINT
 CTranslatorScalarToDXL::ExtractLintValueFromDatum
 	(
-	const IMDType *md_type,
+	const IMDId *mdid,
 	BOOL is_null,
 	BYTE *bytes,
 	ULONG length
 	)
 {
-	IMDId *mdid = md_type->MDId();
-	GPOS_ASSERT(CMDTypeGenericGPDB::HasByte2IntMapping(md_type));
+	GPOS_ASSERT(CMDTypeGenericGPDB::HasByte2IntMapping(mdid));
 
 	LINT lint_value = 0;
 	if (is_null)
