@@ -26,6 +26,8 @@
 #include "gpopt/xforms/CXformEagerAgg.h"
 #include "gpopt/xforms/CXformUtils.h"
 #include "gpopt/base/CColRefSetIter.h"
+#include "gpopt/optimizer/COptimizerConfig.h"
+
 
 using namespace gpopt;
 using namespace gpmd;
@@ -97,13 +99,13 @@ CXformEagerAgg::Transform
 	GPOS_ASSERT(FPromising(pxfctxt->Pmp(), this, agg_expr));
 	GPOS_ASSERT(FCheckPattern(agg_expr));
 
+	CMemoryPool *mp = pxfctxt->Pmp();
 	/* no-op if the transform cannot be applied */
-	if (!CanApplyTransform(agg_expr))
+	if (!CanApplyTransform(mp, agg_expr))
 	{
 		return;
 	}
 
-	CMemoryPool *mp = pxfctxt->Pmp();
 	CExpression *join_expr = (*agg_expr)[0];
 	CExpression *join_outer_child_expr = (*join_expr)[0];
 	CExpression *join_inner_child_expr = (*join_expr)[1];
@@ -247,6 +249,7 @@ BOOL CXformEagerAgg::CanPushAggBelowJoin
 BOOL
 CXformEagerAgg::CanApplyTransform
 	(
+    CMemoryPool *mp,
 	CExpression *gb_agg_expr
 	)
 	const
@@ -264,6 +267,29 @@ CXformEagerAgg::CanApplyTransform
 		// child since we only support pushing down to one of children
 		return false;
 	}
+
+    if (NULL == gb_agg_expr->Pstats())
+    {
+            CExpressionHandle exprhdl(mp);
+            exprhdl.Attach(gb_agg_expr);
+            exprhdl.DeriveStats(mp, mp, NULL /*prprel*/, NULL /*pdrgpstatCtxt*/);
+    }
+
+    if (NULL == join_expr->Pstats())
+    {
+            CExpressionHandle exprhdl(mp);
+            exprhdl.Attach(join_expr);
+            exprhdl.DeriveStats(mp, mp, NULL /*prprel*/, NULL /*pdrgpstatCtxt*/);
+    }
+
+    CDouble gbrows = gb_agg_expr->Pstats()->Rows();
+    CDouble joinrows = join_expr->Pstats()->Rows();
+	COptimizerConfig *optconfig = COptCtxt::PoctxtFromTLS()->GetOptimizerConfig();
+
+    if ((gbrows / joinrows) >= optconfig->GetHint()->EagerAggThreshold())
+    {
+            return false;
+    }
 
 	const ULONG num_aggregates = agg_proj_list_expr->Arity();
 	if (num_aggregates == 0)
