@@ -176,6 +176,10 @@ CQueryMutators::NormalizeGroupByProjList
 	List *target_list_copy = (List*) gpdb::CopyObject(derived_table_query->targetList);
 	ListCell *lc = NULL;
 
+	new_query->hasWindowFuncs = query->hasWindowFuncs;
+	derived_table_query->hasWindowFuncs = false;
+	new_query->windowClause = derived_table_query->windowClause;
+	derived_table_query->windowClause = NULL;
 	// first normalize grouping columns
 	ForEach (lc, target_list_copy)
 	{
@@ -1089,6 +1093,11 @@ CQueryMutators::NormalizeHaving
 	RangeTblEntry *rte = ((RangeTblEntry *) gpdb::ListNth(new_query->rtable, 0));
 	Query *derived_table_query = (Query *) rte->subquery;
 
+	new_query->hasWindowFuncs = true;
+	derived_table_query->hasWindowFuncs = false;
+	new_query->windowClause = derived_table_query->windowClause;
+	derived_table_query->windowClause = NULL;
+
 	// Add all necessary target list entries of subquery
 	// into the target list of the RTE as well as the new top most query
 	ListCell *lc = NULL;
@@ -1321,6 +1330,8 @@ CQueryMutators::ConvertToDerivedTable
 		derived_table_query->havingQual = having_qual;
 	}
 
+	derived_table_query->hasWindowFuncs = true;
+
 	// create a new range table reference for the new RTE
 	RangeTblRef *rtref = MakeNode(RangeTblRef);
 	rtref->rtindex = 1;
@@ -1340,6 +1351,7 @@ CQueryMutators::ConvertToDerivedTable
 	Query *new_query = MakeNode(Query);
 	new_query->cteList = original_cte_list;
 	new_query->hasAggs = false;
+	new_query->hasWindowFuncs = false;
 	new_query->rtable = gpdb::LAppend(new_query->rtable, rte);
 //	new_query->intoClause = origIntoClause;
 	new_query->intoPolicy = into_policy;
@@ -1380,6 +1392,14 @@ CQueryMutators::EliminateDistinctClause
 
 	GPOS_ASSERT(1 == gpdb::ListLength(new_query->rtable));
 	Query *derived_table_query = (Query *) ((RangeTblEntry *) gpdb::ListNth(new_query->rtable, 0))->subquery;
+
+	new_query->hasWindowFuncs = false;
+	derived_table_query->hasWindowFuncs = query->hasWindowFuncs;
+	if (new_query->hasWindowFuncs)
+	{
+		new_query->windowClause = derived_table_query->windowClause;
+		derived_table_query->windowClause = NULL;
+	}
 
 	ReassignSortClause(new_query, derived_table_query);
 
@@ -1516,6 +1536,9 @@ CQueryMutators::NormalizeWindowProjList
 	GPOS_ASSERT(1 == gpdb::ListLength(new_query->rtable));
 	Query *derived_table_query = (Query *) ((RangeTblEntry *) gpdb::ListNth(new_query->rtable, 0))->subquery;
 
+	new_query->hasWindowFuncs = false;
+	derived_table_query->hasWindowFuncs = query->hasWindowFuncs;
+
 	SContextGrpbyPlMutator context(mp, md_accessor, derived_table_query, NULL);
 	ListCell *lc = NULL;
 	List *target_entries = derived_table_query->targetList;
@@ -1574,9 +1597,9 @@ CQueryMutators::NormalizeWindowProjList
 		else
 		{
 			// normalize target list entry
+			context.ressortgroupref = target_entry->ressortgroupref;
 			Expr *pexprNew = (Expr*) RunWindowProjListMutator( (Node*) target_entry->expr, &context);
 			TargetEntry *new_target_entry = gpdb::MakeTargetEntry(pexprNew, ulResNoNew, target_entry->resname, target_entry->resjunk);
-			new_target_entry->ressortgroupref = target_entry->ressortgroupref;
 			new_query->targetList = gpdb::LAppend(new_query->targetList, new_target_entry);
 		}
 	}
@@ -1584,7 +1607,6 @@ CQueryMutators::NormalizeWindowProjList
 
 	GPOS_ASSERT(gpdb::ListLength(new_query->targetList) <= gpdb::ListLength(query->targetList));
 
-	new_query->hasWindowFuncs = false;
 	ReassignSortClause(new_query, derived_table_query);
 
 	return new_query;
@@ -1710,6 +1732,7 @@ CQueryMutators::RunWindowProjListMutator
 			var->varattno = found_tle->resno;
 			var->varlevelsup = context->m_current_query_level;  // reset varlevels up
 			found_tle->resjunk = false;
+			found_tle->ressortgroupref = context->ressortgroupref;
 
 			return (Node*) var;
 		}
