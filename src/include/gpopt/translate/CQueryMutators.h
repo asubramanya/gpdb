@@ -83,6 +83,9 @@ namespace gpdxl
 				// indicate whether we are mutating the argument of a window function
 				BOOL m_is_mutating_window_arg;
 
+				// ressortgroupref of the target entry
+				ULONG ressortgroupref;
+
 				// ctor
 				SContextGrpbyPlMutator
 					(
