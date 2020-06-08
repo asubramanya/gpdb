@@ -42,6 +42,42 @@ extern void applyLockingClause(Query *qry, Index rtindex,
 				   LockClauseStrength strength,
 				   LockWaitPolicy waitPolicy, bool pushedDown);
 
+
+/* Context for transformGroupedWindows() which mutates components
+ * of a query that mixes windowing and aggregation or grouping.  It
+ * accumulates context for eventual construction of a subquery (the
+ * grouping query) during mutation of components of the outer query
+ * (the windowing query).
+ */
+typedef struct
+{
+	List *subtlist; /* target list for subquery */
+	List *subgroupClause; /* group clause for subquery */
+	List *subgroupingSets; /* grouping sets for subquery */
+	List *windowClause; /* window clause for outer query*/
+
+	/* Scratch area for init_grouped_window context and map_sgr_mutator.
+	 */
+	Index  *sgr_map;
+	int		sgr_map_size;
+
+	/* Scratch area for grouped_window_mutator and var_for_gw_expr.
+	 */
+	List *subrtable;
+	int call_depth;
+	TargetEntry *tle;
+} grouped_window_ctx;
+
+extern Query *transformGroupedWindows(ParseState *pstate, Query *qry);
+extern void init_grouped_window_context(grouped_window_ctx *ctx, Query *qry);
+extern Var *var_for_gw_expr(grouped_window_ctx *ctx, Node *expr, bool force);
+extern void discard_grouped_window_context(grouped_window_ctx *ctx);
+extern Node *map_sgr_mutator(Node *node, void *context);
+extern Node *grouped_window_mutator(Node *node, void *context);
+extern Alias *make_replacement_alias(Query *qry, const char *aname);
+extern char *generate_positional_name(AttrNumber attrno);
+extern List*generate_alternate_vars(Var *var, grouped_window_ctx *ctx);
+
 /* State shared by transformCreateStmt and its subroutines */
 typedef struct
 {

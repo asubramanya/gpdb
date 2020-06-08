@@ -273,10 +273,28 @@ standard_planner(Query *parse, int cursorOptions, ParamListInfo boundParams)
 		GP_ROLE_DISPATCH == Gp_role &&
 		IS_QUERY_DISPATCHER())
 	{
+
+		/*
+		 * If the query mixes window functions and aggregates, we need to
+		 * transform it such that the grouped query appears as a subquery
+		 *
+		 * This must be done after collations. Because it, specifically the
+		 * grouped_window_mutator() it called, will replace some expressions with
+		 * Var and set the varcollid with the replaced expressions' original
+		 * collations, which are from assign_query_collations().
+		 *
+		 * Note: assign_query_collations() doesn't handle Var's collation.
+		 */
+		Query *query = (Query *) copyObject(parse);
+		ParseState *pstate = make_parsestate(NULL);
+
+		if (query->hasWindowFuncs && (query->groupClause || query->hasAggs))
+			transformGroupedWindows(pstate, query);
+
 		if (gp_log_optimization_time)
 			INSTR_TIME_SET_CURRENT(starttime);
 
-		result = optimize_query(parse, boundParams);
+		result = optimize_query(query, boundParams);
 
 		if (gp_log_optimization_time)
 		{

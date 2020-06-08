@@ -63,31 +63,6 @@
 #include "utils/lsyscache.h"
 
 
-/* Context for transformGroupedWindows() which mutates components
- * of a query that mixes windowing and aggregation or grouping.  It
- * accumulates context for eventual construction of a subquery (the
- * grouping query) during mutation of components of the outer query
- * (the windowing query).
- */
-typedef struct
-{
-	List *subtlist; /* target list for subquery */
-	List *subgroupClause; /* group clause for subquery */
-	List *subgroupingSets; /* grouping sets for subquery */
-	List *windowClause; /* window clause for outer query*/
-
-	/* Scratch area for init_grouped_window context and map_sgr_mutator.
-	 */
-	Index  *sgr_map;
-	int		sgr_map_size;
-
-	/* Scratch area for grouped_window_mutator and var_for_gw_expr.
-	 */
-	List *subrtable;
-	int call_depth;
-	TargetEntry *tle;
-} grouped_window_ctx;
-
 /* Working state for transformSetOperationTree_internal */
 typedef struct
 {
@@ -144,15 +119,6 @@ static bool test_raw_expression_coverage(Node *node, void *context);
 static int get_distkey_by_name(char *key, IntoClause *into, Query *qry, bool *found);
 static void setQryDistributionPolicy(IntoClause *into, Query *qry);
 
-static Query *transformGroupedWindows(ParseState *pstate, Query *qry);
-static void init_grouped_window_context(grouped_window_ctx *ctx, Query *qry);
-static Var *var_for_gw_expr(grouped_window_ctx *ctx, Node *expr, bool force);
-static void discard_grouped_window_context(grouped_window_ctx *ctx);
-static Node *map_sgr_mutator(Node *node, void *context);
-static Node *grouped_window_mutator(Node *node, void *context);
-static Alias *make_replacement_alias(Query *qry, const char *aname);
-static char *generate_positional_name(AttrNumber attrno);
-static List*generate_alternate_vars(Var *var, grouped_window_ctx *ctx);
 static bool checkCanOptSelectLockingClause(SelectStmt *stmt);
 static bool queryNodeSearch(Node *node, void *context);
 static void sanity_check_on_conflict_update_set_distkey(Oid relid, List *onconflict_set);
@@ -1118,7 +1084,7 @@ transformInsertRow(ParseState *pstate, List *exprlist,
  * also the input, Q, be careful not to destroy values before we're
  * done with them.
  */
-static Query *
+Query *
 transformGroupedWindows(ParseState *pstate, Query *qry)
 {
 	Query *subq;
@@ -1272,7 +1238,7 @@ transformGroupedWindows(ParseState *pstate, Query *qry)
  * grouping and windowing to the subquery context.  The subquery
  * shouldn't care about ordering, etc. XXX
  */
-static void
+void
 init_grouped_window_context(grouped_window_ctx *ctx, Query *qry)
 {
 	List *grp_tles;
@@ -1326,7 +1292,7 @@ init_grouped_window_context(grouped_window_ctx *ctx, Query *qry)
 
 
 /* Helper for transformGroupedWindows */
-static void
+void
 discard_grouped_window_context(grouped_window_ctx *ctx)
 {
 	ctx->subtlist = NIL;
@@ -1348,7 +1314,7 @@ discard_grouped_window_context(grouped_window_ctx *ctx)
  * with the matching expression, or return NULL, if no target
  * was found/added.
  */
-static Var *
+Var *
 var_for_gw_expr(grouped_window_ctx *ctx, Node *expr, bool force)
 {
 	Var *var = NULL;
@@ -1398,7 +1364,7 @@ var_for_gw_expr(grouped_window_ctx *ctx, Node *expr, bool force)
  * Mutator for subquery groupingClause to adjust sortgrpref values
  * based on map developed while priming context target list.
  */
-static Node*
+Node*
 map_sgr_mutator(Node *node, void *context)
 {
 	grouped_window_ctx *ctx = (grouped_window_ctx*)context;
@@ -1489,7 +1455,7 @@ map_sgr_mutator(Node *node, void *context)
  * the target list into var, expr, and group/aggregate function lists.)
  */
 
-static Node* grouped_window_mutator(Node *node, void *context)
+Node* grouped_window_mutator(Node *node, void *context)
 {
 	Node *result = NULL;
 
@@ -1605,7 +1571,7 @@ static Node* grouped_window_mutator(Node *node, void *context)
  * The input string aname is the name for the overall Alias. The
  * attribute names are all found or made up.
  */
-static Alias *
+Alias *
 make_replacement_alias(Query *qry, const char *aname)
 {
 	ListCell *lc = NULL;
@@ -1650,7 +1616,7 @@ make_replacement_alias(Query *qry, const char *aname)
  *
  * Make a palloc'd C-string named for the input attribute number.
  */
-static char *
+char *
 generate_positional_name(AttrNumber attrno)
 {
 	int rc = 0;
@@ -1682,7 +1648,7 @@ generate_positional_name(AttrNumber attrno)
  * This is not efficient, but the need is rare (MPP-12082) so we don't
  * bother to precompute this.
  */
-static List*
+List*
 generate_alternate_vars(Var *invar, grouped_window_ctx *ctx)
 {
 	List *rtable = ctx->subrtable;
@@ -2093,20 +2059,6 @@ transformSelectStmt(ParseState *pstate, SelectStmt *stmt)
 	/* this must be done after collations, for reliable comparison of exprs */
 	if (pstate->p_hasAggs || qry->groupClause || qry->groupingSets || qry->havingQual)
 		parseCheckAggregates(pstate, qry);
-
-	/*
-	 * If the query mixes window functions and aggregates, we need to
-	 * transform it such that the grouped query appears as a subquery
-	 *
-	 * This must be done after collations. Because it, specifically the
-	 * grouped_window_mutator() it called, will replace some expressions with
-	 * Var and set the varcollid with the replaced expressions' original
-	 * collations, which are from assign_query_collations().
-	 *
-	 * Note: assign_query_collations() doesn't handle Var's collation.
-	 */
-	if (qry->hasWindowFuncs && (qry->groupClause || qry->hasAggs))
-		transformGroupedWindows(pstate, qry);
 
 	return qry;
 }
