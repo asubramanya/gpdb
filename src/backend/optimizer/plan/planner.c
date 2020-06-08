@@ -290,6 +290,7 @@ standard_planner(Query *parse, int cursorOptions, ParamListInfo boundParams)
 
 		if (query->hasWindowFuncs && (query->groupClause || query->hasAggs))
 			transformGroupedWindows(pstate, query);
+		free_parsestate(pstate);
 
 		if (gp_log_optimization_time)
 			INSTR_TIME_SET_CURRENT(starttime);
