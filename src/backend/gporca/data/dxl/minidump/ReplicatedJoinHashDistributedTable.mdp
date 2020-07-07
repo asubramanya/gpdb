@@ -1484,7 +1484,7 @@
               <dxl:Ident ColId="10" ColName="b" TypeMdid="0.23.1.0"/>
             </dxl:Comparison>
           </dxl:HashCondList>
-          <dxl:RedistributeMotion InputSegments="0" OutputSegments="0,1,2" DuplicateSensitive="true">
+          <dxl:RedistributeMotion InputSegments="0" OutputSegments="0,1,2">
             <dxl:Properties>
               <dxl:Cost StartupCost="0" TotalCost="431.005655" Rows="100.000000" Width="8"/>
             </dxl:Properties>
@@ -1505,7 +1505,7 @@
             </dxl:HashExprList>
             <dxl:TableScan>
               <dxl:Properties>
-                <dxl:Cost StartupCost="0" TotalCost="431.002090" Rows="300.000000" Width="8"/>
+                <dxl:Cost StartupCost="0" TotalCost="431.002090" Rows="100.000000" Width="8"/>
               </dxl:Properties>
               <dxl:ProjList>
                 <dxl:ProjElem ColId="0" Alias="a">

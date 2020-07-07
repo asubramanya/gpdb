@@ -18,6 +18,7 @@
 #include "gpopt/base/CDistributionSpecHashed.h"
 #include "gpopt/base/CDistributionSpecRouted.h"
 #include "gpopt/base/CDistributionSpecStrictRandom.h"
+#include "gpopt/base/CDistributionSpecReplicated.h"
 #include "gpopt/operators/CExpressionHandle.h"
 #include "gpopt/operators/CPredicateUtils.h"
 #include "gpopt/operators/CPhysicalDML.h"
@@ -116,6 +117,13 @@ CPhysicalDML::CPhysicalDML
 			m_pds = GPOS_NEW(mp) CDistributionSpecRandom();
 		}
 	}
+
+	if (m_ptabdesc->GetRelDistribution() == IMDRelation::EreldistrReplicated)
+	{
+		m_pds->Release();
+		m_pds = GPOS_NEW(mp) CDistributionSpecReplicated();
+	}
+
 	m_pos = PosComputeRequired(mp, ptabdesc);
 	ComputeRequiredLocalColumns(mp);
 }
