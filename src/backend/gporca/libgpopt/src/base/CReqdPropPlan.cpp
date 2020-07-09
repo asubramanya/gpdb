@@ -179,33 +179,54 @@ CReqdPropPlan::Compute(CMemoryPool *mp, CExpressionHandle &exprhdl,
 	ULONG ulDistrReq = 0;
 	ULONG ulRewindReq = 0;
 	ULONG ulPartPropagateReq = 0;
-	popPhysical->LookupRequest(ulOptReq, &ulOrderReq, &ulDistrReq, &ulRewindReq,
-							   &ulPartPropagateReq);
+	popPhysical->LookupRequest(ulOptReq, &ulOrderReq, &ulDistrReq, &ulRewindReq, &ulPartPropagateReq);
+	
+	m_peo = GPOS_NEW(mp) CEnfdOrder
+						(
+						popPhysical->PosRequired
+							(
+							mp,
+							exprhdl,
+							prppInput->Peo()->PosRequired(),
+							child_index,
+							pdrgpdpCtxt,
+							ulOrderReq
+							),
+						popPhysical->Eom(prppInput, child_index, pdrgpdpCtxt, ulOrderReq)
+						);
 
-	m_peo = GPOS_NEW(mp) CEnfdOrder(
-		popPhysical->PosRequired(mp, exprhdl, prppInput->Peo()->PosRequired(),
-								 child_index, pdrgpdpCtxt, ulOrderReq),
-		popPhysical->Eom(prppInput, child_index, pdrgpdpCtxt, ulOrderReq));
+	m_ped = popPhysical->Ped(mp, exprhdl, prppInput, child_index, pdrgpdpCtxt, ulDistrReq);
 
-	m_ped = GPOS_NEW(mp) CEnfdDistribution(
-		popPhysical->PdsRequired(mp, exprhdl, prppInput->Ped()->PdsRequired(),
-								 child_index, pdrgpdpCtxt, ulDistrReq),
-		popPhysical->Edm(prppInput, child_index, pdrgpdpCtxt, ulDistrReq));
+	GPOS_ASSERT(CDistributionSpec::EdtUniversal != m_ped->PdsRequired()->Edt() && "CDistributionSpecUniversal is a derive-only, cannot be required");
 
-	GPOS_ASSERT(
-		CDistributionSpec::EdtUniversal != m_ped->PdsRequired()->Edt() &&
-		"CDistributionSpecUniversal is a derive-only, cannot be required");
-
-	m_per = GPOS_NEW(mp) CEnfdRewindability(
-		popPhysical->PrsRequired(mp, exprhdl, prppInput->Per()->PrsRequired(),
-								 child_index, pdrgpdpCtxt, ulRewindReq),
-		popPhysical->Erm(prppInput, child_index, pdrgpdpCtxt, ulRewindReq));
-
-	m_pepp = GPOS_NEW(mp) CEnfdPartitionPropagation(
-		popPhysical->PppsRequired(mp, exprhdl,
-								  prppInput->Pepp()->PppsRequired(),
-								  child_index, pdrgpdpCtxt, ulPartPropagateReq),
-		CEnfdPartitionPropagation::EppmSatisfy, ppfmDerived);
+	m_per = GPOS_NEW(mp) CEnfdRewindability
+							(
+							popPhysical->PrsRequired
+								(
+								mp,
+								exprhdl,
+								prppInput->Per()->PrsRequired(),
+								child_index,
+								pdrgpdpCtxt,
+								ulRewindReq
+								),
+							popPhysical->Erm(prppInput, child_index, pdrgpdpCtxt, ulRewindReq)
+							);
+	
+	m_pepp = GPOS_NEW(mp) CEnfdPartitionPropagation
+							(
+							popPhysical->PppsRequired
+								(
+								mp, 
+								exprhdl, 
+								prppInput->Pepp()->PppsRequired(), 
+								child_index, 
+								pdrgpdpCtxt, 
+								ulPartPropagateReq
+								),
+							CEnfdPartitionPropagation::EppmSatisfy,
+							ppfmDerived
+							);
 }
 
 //---------------------------------------------------------------------------
