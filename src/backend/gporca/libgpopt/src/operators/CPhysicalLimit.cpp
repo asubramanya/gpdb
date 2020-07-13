@@ -185,14 +185,8 @@ CPhysicalLimit::PdsRequired(CMemoryPool *mp, CExpressionHandle &exprhdl,
 
 			return GPOS_NEW(mp) CDistributionSpecAny(this->Eopid());
 		}
-		if (CDistributionSpec::EdtSingleton == pdsInput->Edt())
-		{
-			// pass through input distribution if it is a singleton (and it has count or offset)
-			return PdsPassThru(mp, exprhdl, pdsInput, child_index);
-		}
 
-		// otherwise, require a singleton explicitly
-		return GPOS_NEW(mp) CDistributionSpecSingleton();
+		return PdsRequireSingleton(mp, exprhdl, pdsInput, child_index);
 	}
 
 	// if expression has to execute on a single host then we need a gather
