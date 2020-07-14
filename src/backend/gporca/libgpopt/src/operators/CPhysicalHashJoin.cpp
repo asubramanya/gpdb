@@ -450,7 +450,7 @@ CPhysicalHashJoin::PdsRequiredSingleton(CMemoryPool *mp,
 		CDrvdPropPlan::Pdpplan((*pdrgpdpCtxt)[0])->Pds();
 	GPOS_ASSERT(NULL != pdsFirst);
 
-	if (CDistributionSpec::EdtUniversal == pdsFirst->Edt())
+	if (CDistributionSpec::EdtUniversal == pdsFirst->Edt() || CDistributionSpec::EdtTaintedReplicated == pdsFirst->Edt())
 	{
 		// first child is universal, request second child to execute on a single host to avoid duplicates
 		return GPOS_NEW(mp) CDistributionSpecSingleton();
@@ -532,7 +532,7 @@ CPhysicalHashJoin::PdsRequiredReplicate(
 	}
 
 	// otherwise, require second child to deliver non-singleton distribution
-	GPOS_ASSERT(CDistributionSpec::EdtReplicated == pdsInner->Edt());
+	GPOS_ASSERT(CDistributionSpec::EdtReplicated == pdsInner->Edt() || CDistributionSpec::EdtTaintedReplicated == pdsInner->Edt());
 	return GPOS_NEW(mp) CDistributionSpecNonSingleton();
 }
 
