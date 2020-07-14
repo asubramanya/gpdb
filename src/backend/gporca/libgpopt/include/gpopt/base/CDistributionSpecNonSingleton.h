@@ -32,75 +32,94 @@ using namespace gpos;
 //---------------------------------------------------------------------------
 class CDistributionSpecNonSingleton : public CDistributionSpec
 {
-private:
-	// should Replicated distribution satisfy current distribution
-	BOOL m_fAllowReplicated;
+		private:
 
-	// private copy ctor
-	CDistributionSpecNonSingleton(const CDistributionSpecNonSingleton &);
+			// should Replicated distribution satisfy current distribution
+			BOOL m_fAllowReplicated;
 
-public:
-	//ctor
-	CDistributionSpecNonSingleton();
+			// private copy ctor
+			CDistributionSpecNonSingleton(const CDistributionSpecNonSingleton &);
 
-	//ctor
-	explicit CDistributionSpecNonSingleton(BOOL fAllowReplicated);
+		public:
 
-	// should Replicated distribution satisfy current distribution
-	BOOL
-	FAllowReplicated() const
-	{
-		return m_fAllowReplicated;
-	}
+			//ctor
+			CDistributionSpecNonSingleton();
 
-	// accessor
-	virtual EDistributionType
-	Edt() const
-	{
-		return CDistributionSpec::EdtNonSingleton;
-	}
+			//ctor
+			explicit
+			CDistributionSpecNonSingleton(BOOL fAllowReplicated);
 
-	// does current distribution satisfy the given one
-	virtual BOOL FSatisfies(const CDistributionSpec *pds) const;
+			// should Replicated distribution satisfy current distribution
+			BOOL FAllowReplicated() const
+			{
+				return m_fAllowReplicated;
+			}
 
-	// append enforcers to dynamic array for the given plan properties
-	virtual void AppendEnforcers(CMemoryPool *mp, CExpressionHandle &exprhdl,
-								 CReqdPropPlan *prpp,
-								 CExpressionArray *pdrgpexpr,
-								 CExpression *pexpr);
+			// accessor
+			virtual
+			EDistributionType Edt() const
+			{
+				return CDistributionSpec::EdtNonSingleton;
+			}
 
-	// return distribution partitioning type
-	virtual EDistributionPartitioningType
-	Edpt() const
-	{
-		// a non-singleton distribution could be replicated to all segments, or partitioned across segments
-		return EdptUnknown;
-	}
+			// does current distribution satisfy the given one
+			virtual
+			BOOL FSatisfies(const CDistributionSpec *pds) const;
 
-	// return true if distribution spec can be derived
-	virtual BOOL
-	FDerivable() const
-	{
-		return false;
-	}
+			// append enforcers to dynamic array for the given plan properties
+			virtual
+			void AppendEnforcers(CMemoryPool *mp, CExpressionHandle &exprhdl, CReqdPropPlan *prpp, CExpressionArray *pdrgpexpr, CExpression *pexpr);
 
-	// print
-	virtual IOstream &OsPrint(IOstream &os) const;
+			// return distribution partitioning type
+			virtual
+			EDistributionPartitioningType Edpt() const
+			{
+				// a non-singleton distribution could be replicated to all segments, or partitioned across segments
+				return EdptUnknown;
+			}
 
-	// conversion function
-	static CDistributionSpecNonSingleton *
-	PdsConvert(CDistributionSpec *pds)
-	{
-		GPOS_ASSERT(NULL != pds);
-		GPOS_ASSERT(EdtNonSingleton == pds->Edt());
+			// return true if distribution spec can be derived
+			virtual
+			BOOL FDerivable() const
+			{
+				return false;
+			}
 
-		return dynamic_cast<CDistributionSpecNonSingleton *>(pds);
-	}
+			// print
+			virtual
+			IOstream &OsPrint(IOstream &os) const;
 
-};	// class CDistributionSpecNonSingleton
+			// conversion function
+			static
+			CDistributionSpecNonSingleton *PdsConvert
+				(
+				CDistributionSpec *pds
+				)
+			{
+				GPOS_ASSERT(NULL != pds);
+				GPOS_ASSERT(EdtNonSingleton == pds->Edt());
 
-}  // namespace gpopt
+				return dynamic_cast<CDistributionSpecNonSingleton*>(pds);
+			}
 
-#endif	// !GPOPT_CDistributionSpecNonSingleton_H
+		// conversion function
+		static
+		const CDistributionSpecNonSingleton *PdsConvert
+			(
+				const CDistributionSpec *pds
+			)
+		{
+			GPOS_ASSERT(NULL != pds);
+			GPOS_ASSERT(EdtNonSingleton == pds->Edt());
+
+			return dynamic_cast<const CDistributionSpecNonSingleton*>(pds);
+		}
+
+
+	}; // class CDistributionSpecNonSingleton
+
+}
+
+#endif // !GPOPT_CDistributionSpecNonSingleton_H
 
 // EOF

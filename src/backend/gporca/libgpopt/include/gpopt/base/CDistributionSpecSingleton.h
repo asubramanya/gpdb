@@ -31,108 +31,124 @@ using namespace gpos;
 //---------------------------------------------------------------------------
 class CDistributionSpecSingleton : public CDistributionSpec
 {
-public:
-	// type of segment
-	enum ESegmentType
-	{
-		EstMaster,
-		EstSegment,
-		EstSentinel
-	};
+		public:
+			// type of segment
+			enum ESegmentType
+			{
+				EstMaster,
+				EstSegment,
+				EstSentinel
+			};
+				
+		protected:
+			
+			// what type of segment is data distributed on
+			ESegmentType m_est;
+			
+			// segment type name
+			static
+			const CHAR *m_szSegmentType[EstSentinel];
 
-protected:
-	// what type of segment is data distributed on
-	ESegmentType m_est;
+		private:
+			
+			// private copy ctor
+			CDistributionSpecSingleton(const CDistributionSpecSingleton &);
+			
+		public:
+		
+			// ctor
+			explicit 
+			CDistributionSpecSingleton(ESegmentType esegtype);
 
-	// segment type name
-	static const CHAR *m_szSegmentType[EstSentinel];
+			CDistributionSpecSingleton();
 
-private:
-	// private copy ctor
-	CDistributionSpecSingleton(const CDistributionSpecSingleton &);
+			// distribution type accessor
+			virtual 
+			EDistributionType Edt() const
+			{
+				return CDistributionSpec::EdtSingleton;
+			}
+			
+			// segment type accessor
+			ESegmentType Est() const
+			{
+				return m_est;
+			}
+					
+			// is this a master-only distribution
+			BOOL FOnMaster() const
+			{
+				return EstMaster == m_est;
+			}
+			
+			// return distribution partitioning type
+			virtual
+			EDistributionPartitioningType Edpt() const
+			{
+				return EdptNonPartitioned;
+			}
 
-public:
-	// ctor
-	explicit CDistributionSpecSingleton(ESegmentType esegtype);
+			// does this distribution satisfy the given one
+			virtual 
+			BOOL FSatisfies(const CDistributionSpec *pds) const;
+			
+			// hash function for singleton distribution spec
+			virtual
+			ULONG HashValue() const
+			{
+				ULONG ulEdt = (ULONG) Edt();
+				BOOL fOnMaster = FOnMaster();
+				
+				return gpos::CombineHashes(gpos::HashValue<ULONG>(&ulEdt),
+												gpos::HashValue<BOOL>(&fOnMaster));
+			}
+			
+			// match function for singleton distribution specs
+			virtual
+			BOOL Matches(const CDistributionSpec *pds) const
+			{
+				return Edt() == pds->Edt() && 
+						FOnMaster() == dynamic_cast<const CDistributionSpecSingleton *>(pds)->FOnMaster();
+			}
+			
+			// append enforcers to dynamic array for the given plan properties
+			virtual
+			void AppendEnforcers(CMemoryPool *mp, CExpressionHandle &exprhdl, CReqdPropPlan *prpp, CExpressionArray *pdrgpexpr, CExpression *pexpr);
 
-	CDistributionSpecSingleton();
+			// print
+			virtual
+			IOstream &OsPrint(IOstream &os) const;
 
-	// distribution type accessor
-	virtual EDistributionType
-	Edt() const
-	{
-		return CDistributionSpec::EdtSingleton;
-	}
+			// conversion function
+			static
+			CDistributionSpecSingleton *PdssConvert
+				(
+				CDistributionSpec *pds
+				)
+			{
+				GPOS_ASSERT(NULL != pds);
+				GPOS_ASSERT(EdtSingleton == pds->Edt() || EdtStrictSingleton == pds->Edt());
 
-	// segment type accessor
-	ESegmentType
-	Est() const
-	{
-		return m_est;
-	}
+				return dynamic_cast<CDistributionSpecSingleton*>(pds);
+			}
 
-	// is this a master-only distribution
-	BOOL
-	FOnMaster() const
-	{
-		return EstMaster == m_est;
-	}
+			// conversion function
+			static
+			const CDistributionSpecSingleton *PdssConvert
+				(
+				const CDistributionSpec *pds
+				)
+			{
+				GPOS_ASSERT(NULL != pds);
+				GPOS_ASSERT(EdtSingleton == pds->Edt() || EdtStrictSingleton == pds->Edt());
 
-	// return distribution partitioning type
-	virtual EDistributionPartitioningType
-	Edpt() const
-	{
-		return EdptNonPartitioned;
-	}
+				return dynamic_cast<const CDistributionSpecSingleton*>(pds);
+			}
 
-	// does this distribution satisfy the given one
-	virtual BOOL FSatisfies(const CDistributionSpec *pds) const;
+	}; // class CDistributionSpecSingleton
 
-	// hash function for singleton distribution spec
-	virtual ULONG
-	HashValue() const
-	{
-		ULONG ulEdt = (ULONG) Edt();
-		BOOL fOnMaster = FOnMaster();
+}
 
-		return gpos::CombineHashes(gpos::HashValue<ULONG>(&ulEdt),
-								   gpos::HashValue<BOOL>(&fOnMaster));
-	}
-
-	// match function for singleton distribution specs
-	virtual BOOL
-	Matches(const CDistributionSpec *pds) const
-	{
-		return Edt() == pds->Edt() &&
-			   FOnMaster() ==
-				   dynamic_cast<const CDistributionSpecSingleton *>(pds)
-					   ->FOnMaster();
-	}
-
-	// append enforcers to dynamic array for the given plan properties
-	virtual void AppendEnforcers(CMemoryPool *mp, CExpressionHandle &exprhdl,
-								 CReqdPropPlan *prpp,
-								 CExpressionArray *pdrgpexpr,
-								 CExpression *pexpr);
-
-	// print
-	virtual IOstream &OsPrint(IOstream &os) const;
-
-	// conversion function
-	static CDistributionSpecSingleton *
-	PdssConvert(CDistributionSpec *pds)
-	{
-		GPOS_ASSERT(NULL != pds);
-		GPOS_ASSERT(EdtSingleton == pds->Edt() ||
-					EdtStrictSingleton == pds->Edt());
-
-		return dynamic_cast<CDistributionSpecSingleton *>(pds);
-	}
-
-};	// class CDistributionSpecSingleton
-
-}  // namespace gpopt
-
-#endif	// !GPOPT_CDistributionSpecSingleton_H
+#endif // !GPOPT_CDistributionSpecSingleton_H
 
 // EOF
