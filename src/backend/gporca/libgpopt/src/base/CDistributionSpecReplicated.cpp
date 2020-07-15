@@ -12,6 +12,7 @@
 #include "naucrates/traceflags/traceflags.h"
 #include "gpopt/base/CDistributionSpecReplicated.h"
 #include "gpopt/base/CDistributionSpecNonSingleton.h"
+#include "gpopt/base/CDistributionSpecGeneralReplicated.h"
 #include "gpopt/operators/CPhysicalMotionBroadcast.h"
 
 #define GPOPT_DISTR_SPEC_COLREF_HASHED (ULONG(5))
@@ -44,6 +45,12 @@ CDistributionSpecReplicated::FSatisfies(const CDistributionSpec *pdss) const
 		return CDistributionSpecNonSingleton::PdsConvert(
 				   const_cast<CDistributionSpec *>(pdss))
 			->FAllowReplicated();
+	}
+
+	// replicated distribution satisfies a general replicated distribution spec
+	if (EdtGeneralReplicated == pdss->Edt())
+	{
+		return true;
 	}
 
 	// a replicated distribution satisfies any non-singleton one,
@@ -94,4 +101,15 @@ CDistributionSpecReplicated::AppendEnforcers(CMemoryPool *mp,
 	pdrgpexpr->Append(pexprMotion);
 }
 
+BOOL
+CDistributionSpecReplicated::Matches(const CDistributionSpec *pds) const
+{
+	switch (pds->Edt())
+	{
+		default: return false;
+		case CDistributionSpec::EdtGeneralReplicated:
+		case CDistributionSpec::EdtReplicated:
+			return true;
+	}
+}
 // EOF

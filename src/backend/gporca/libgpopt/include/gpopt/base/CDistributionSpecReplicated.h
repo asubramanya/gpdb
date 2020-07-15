@@ -31,60 +31,65 @@ using namespace gpos;
 //---------------------------------------------------------------------------
 class CDistributionSpecReplicated : public CDistributionSpec
 {
-private:
-	// private copy ctor
-	CDistributionSpecReplicated(const CDistributionSpecReplicated &);
 
-public:
-	// ctor
-	CDistributionSpecReplicated()
-	{
-	}
+		private:
 
-	// accessor
-	virtual EDistributionType
-	Edt() const
-	{
-		return CDistributionSpec::EdtReplicated;
-	}
+			// private copy ctor
+			CDistributionSpecReplicated(const CDistributionSpecReplicated &);
+			
+		public:
+			// ctor
+			CDistributionSpecReplicated()
+			{}
+			
+			// accessor
+			virtual 
+			EDistributionType Edt() const
+			{
+				return CDistributionSpec::EdtReplicated;
+			}
+			
+			// does this distribution satisfy the given one
+			virtual 
+			BOOL FSatisfies(const CDistributionSpec *pds) const;
+			
+			// append enforcers to dynamic array for the given plan properties
+			virtual
+			void AppendEnforcers(CMemoryPool *mp, CExpressionHandle &exprhdl, CReqdPropPlan *prpp, CExpressionArray *pdrgpexpr, CExpression *pexpr);
 
-	// does this distribution satisfy the given one
-	virtual BOOL FSatisfies(const CDistributionSpec *pds) const;
+			// return distribution partitioning type
+			virtual
+			EDistributionPartitioningType Edpt() const
+			{
+				return EdptNonPartitioned;
+			}
 
-	// append enforcers to dynamic array for the given plan properties
-	virtual void AppendEnforcers(CMemoryPool *mp, CExpressionHandle &exprhdl,
-								 CReqdPropPlan *prpp,
-								 CExpressionArray *pdrgpexpr,
-								 CExpression *pexpr);
+			// print
+			virtual
+			IOstream &OsPrint(IOstream &os) const
+			{
+				return os << "REPLICATED ";
+			}
+			
+			// conversion function
+			static
+			CDistributionSpecReplicated *PdsConvert
+				(
+				CDistributionSpec *pds
+				)
+			{
+				GPOS_ASSERT(NULL != pds);
+				GPOS_ASSERT(EdtReplicated == pds->Edt());
 
-	// return distribution partitioning type
-	virtual EDistributionPartitioningType
-	Edpt() const
-	{
-		return EdptNonPartitioned;
-	}
+				return dynamic_cast<CDistributionSpecReplicated*>(pds);
+			}
 
-	// print
-	virtual IOstream &
-	OsPrint(IOstream &os) const
-	{
-		return os << "REPLICATED ";
-	}
+			BOOL Matches(const CDistributionSpec *pds) const;
 
-	// conversion function
-	static CDistributionSpecReplicated *
-	PdsConvert(CDistributionSpec *pds)
-	{
-		GPOS_ASSERT(NULL != pds);
-		GPOS_ASSERT(EdtReplicated == pds->Edt());
+	}; // class CDistributionSpecReplicated
 
-		return dynamic_cast<CDistributionSpecReplicated *>(pds);
-	}
+}
 
-};	// class CDistributionSpecReplicated
-
-}  // namespace gpopt
-
-#endif	// !GPOPT_CDistributionSpecReplicated_H
+#endif // !GPOPT_CDistributionSpecReplicated_H
 
 // EOF
