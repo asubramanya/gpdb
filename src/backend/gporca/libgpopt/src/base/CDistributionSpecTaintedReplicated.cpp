@@ -18,6 +18,8 @@ CDistributionSpecTaintedReplicated::FSatisfies(const CDistributionSpec *pds) con
 			return false;
 		case CDistributionSpec::EdtAny:
 			return true;
+		case CDistributionSpec::EdtGeneralReplicated:
+			return true;
 		case CDistributionSpec::EdtNonSingleton:
 			return CDistributionSpecNonSingleton::PdsConvert(pds)->FAllowReplicated();
 		case CDistributionSpec::EdtSingleton:
