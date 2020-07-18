@@ -84,8 +84,6 @@ class CDistributionSpecReplicated : public CDistributionSpec
 				return dynamic_cast<CDistributionSpecReplicated*>(pds);
 			}
 
-			BOOL Matches(const CDistributionSpec *pds) const;
-
 	}; // class CDistributionSpecReplicated
 
 }

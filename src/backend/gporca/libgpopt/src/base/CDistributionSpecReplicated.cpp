@@ -12,7 +12,6 @@
 #include "naucrates/traceflags/traceflags.h"
 #include "gpopt/base/CDistributionSpecReplicated.h"
 #include "gpopt/base/CDistributionSpecNonSingleton.h"
-#include "gpopt/base/CDistributionSpecGeneralReplicated.h"
 #include "gpopt/operators/CPhysicalMotionBroadcast.h"
 
 #define GPOPT_DISTR_SPEC_COLREF_HASHED (ULONG(5))
@@ -99,17 +98,5 @@ CDistributionSpecReplicated::AppendEnforcers(CMemoryPool *mp,
 	CExpression *pexprMotion = GPOS_NEW(mp)
 		CExpression(mp, GPOS_NEW(mp) CPhysicalMotionBroadcast(mp), pexpr);
 	pdrgpexpr->Append(pexprMotion);
-}
-
-BOOL
-CDistributionSpecReplicated::Matches(const CDistributionSpec *pds) const
-{
-	switch (pds->Edt())
-	{
-		default: return false;
-		case CDistributionSpec::EdtGeneralReplicated:
-		case CDistributionSpec::EdtReplicated:
-			return true;
-	}
 }
 // EOF

@@ -965,10 +965,13 @@ CPhysicalJoin::PdsRequiredCorrelatedJoin(
 //
 //---------------------------------------------------------------------------
 CEnfdDistribution::EDistributionMatching
-CPhysicalJoin::Edm(CReqdPropPlan *,	 // prppInput
-				   ULONG child_index, CDrvdPropArray *pdrgpdpCtxt,
-				   ULONG  // ulOptReq
-)
+CPhysicalJoin::Edm
+	(
+	CReqdPropPlan *, // prppInput
+	ULONG child_index,
+	CDrvdPropArray *pdrgpdpCtxt,
+	ULONG //ulOptReq
+	)
 {
 	if (FFirstChildToOptimize(child_index))
 	{
@@ -986,6 +989,13 @@ CPhysicalJoin::Edm(CReqdPropPlan *,	 // prppInput
 	{
 		// if previous child is replicated or universal, we use
 		// distribution satisfaction for current child
+		return CEnfdDistribution::EdmSatisfy;
+	}
+
+	// FIXME: We need to refactor the PdsRequired method to return a Distribution, Edm
+	// pair instead of adding conditionals here
+	if (1 == child_index && CDistributionSpec::EdtSingleton != edtPrevChild && CDistributionSpec::EdtUniversal != edtPrevChild)
+	{
 		return CEnfdDistribution::EdmSatisfy;
 	}
 
