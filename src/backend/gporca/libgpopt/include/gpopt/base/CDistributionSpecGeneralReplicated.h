@@ -16,7 +16,8 @@ namespace gpopt
 	{
 		public:
 			// ctor
-			CDistributionSpecGeneralReplicated() = default;
+			CDistributionSpecGeneralReplicated()
+			{}
 
 			// accessor
 			virtual
