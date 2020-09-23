@@ -83,6 +83,8 @@ namespace gpopt
 				return m_fHasVolatileFunctionScan;
 			}
 
+			BOOL HasVolatileFunctions() const;
+
 			// check if must execute on a single host
 			BOOL NeedsSingletonExecution() const;
 

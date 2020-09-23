@@ -182,6 +182,11 @@ CPhysicalComputeScalar::PdsRequired
 	GPOS_ASSERT(0 == child_index);
 	GPOS_ASSERT(2 > ulOptReq);
 
+	if (exprhdl.HasVolatileFunctions())
+	{
+		return GPOS_NEW(mp) CDistributionSpecSingleton();
+	}
+
 	// check if singleton/replicated distribution needs to be requested
 	CDistributionSpec *pds = PdsRequireSingletonOrReplicated(mp, exprhdl, pdsRequired, child_index, ulOptReq);
 	if (NULL != pds)

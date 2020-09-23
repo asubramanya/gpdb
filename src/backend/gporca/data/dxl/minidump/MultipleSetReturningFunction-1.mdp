@@ -126,7 +126,7 @@ select generate_series(0,2) rn, unnest(arr) cnt_div from (select ARRAY['0','1','
         </dxl:LogicalProject>
       </dxl:LogicalProject>
     </dxl:Query>
-    <dxl:Plan Id="0" SpaceSize="1">
+    <dxl:Plan Id="0" SpaceSize="2">
       <dxl:Result>
         <dxl:Properties>
           <dxl:Cost StartupCost="0" TotalCost="0.000021" Rows="1.000000" Width="12"/>

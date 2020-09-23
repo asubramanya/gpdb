@@ -223,6 +223,11 @@ namespace gpopt
 				return m_pgexpr;
 			}
 
+			BOOL HasVolatileFunctions()
+			{
+				return DeriveFunctionProperties()->HasVolatileFunctions();
+			}
+
 			// check for outer references
 			BOOL HasOuterRefs()
 			{

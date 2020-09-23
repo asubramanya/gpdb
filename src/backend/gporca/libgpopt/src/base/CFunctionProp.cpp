@@ -76,6 +76,13 @@ CFunctionProp::NeedsSingletonExecution() const
 
 }
 
+
+BOOL
+CFunctionProp::HasVolatileFunctions() const
+{
+	return IMDFunction::EfsVolatile == m_efs;
+}
+
 //---------------------------------------------------------------------------
 //	@function:
 //		CFunctionProp::OsPrint
