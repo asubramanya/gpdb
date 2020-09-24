@@ -15,7 +15,6 @@
 #include "gpopt/base/CDistributionSpecAny.h"
 #include "gpopt/base/CDistributionSpecHashed.h"
 #include "gpopt/base/CDistributionSpecReplicated.h"
-#include "gpopt/base/CDistributionSpecTaintedReplicated.h"
 #include "gpopt/base/CDistributionSpecSingleton.h"
 #include "gpopt/base/CUtils.h"
 #include "gpopt/base/CWindowFrame.h"
@@ -332,12 +331,12 @@ CPhysicalSequenceProject::PdsRequired(CMemoryPool *mp,
 	if (exprhdl.HasOuterRefs())
 	{
 		if (CDistributionSpec::EdtSingleton == pdsRequired->Edt() ||
-			CDistributionSpec::EdtReplicated == pdsRequired->Edt())
+			CDistributionSpec::EdtStrictReplicated == pdsRequired->Edt())
 		{
 			return PdsPassThru(mp, exprhdl, pdsRequired, child_index);
 		}
 
-		return GPOS_NEW(mp) CDistributionSpecReplicated();
+		return GPOS_NEW(mp) CDistributionSpecReplicated(CDistributionSpecReplicated::EReplicatedType::ErtStrict);
 	}
 
 	// if the window operator has a partition by clause, then always
@@ -507,9 +506,12 @@ CPhysicalSequenceProject::PdsDerive(CMemoryPool *mp,
 									CExpressionHandle &exprhdl) const
 {
 	CDistributionSpec *pds = exprhdl.Pdpplan(0 /*child_index*/)->Pds();
-	if (CDistributionSpec::EdtReplicated == pds->Edt())
+	if (CDistributionSpec::EdtStrictReplicated == pds->Edt())
 	{
-		return GPOS_NEW(mp) CDistributionSpecTaintedReplicated();
+		// Sequence project (i.e. window functions) cannot guarantee replicated
+		// data. If the child was replicated, we can no longer guarantee that
+		// property. Therefore we must now dervive tainted replicated.
+		return GPOS_NEW(mp) CDistributionSpecReplicated(CDistributionSpecReplicated::EReplicatedType::ErtTainted);
 	}
 	else
 	{

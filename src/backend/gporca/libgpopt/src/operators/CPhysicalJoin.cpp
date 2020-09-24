@@ -16,7 +16,6 @@
 #include "gpopt/base/CCastUtils.h"
 #include "gpopt/base/CDistributionSpecAny.h"
 #include "gpopt/base/CDistributionSpecReplicated.h"
-#include "gpopt/base/CDistributionSpecGeneralReplicated.h"
 
 #include "naucrates/md/IMDScalarOp.h"
 
@@ -273,11 +272,11 @@ CPhysicalJoin::PdsRequired(CMemoryPool *mp, CExpressionHandle &exprhdl,
 	if (exprhdl.HasOuterRefs())
 	{
 		if (CDistributionSpec::EdtSingleton == pdsRequired->Edt() ||
-			CDistributionSpec::EdtReplicated == pdsRequired->Edt())
+			CDistributionSpec::EdtStrictReplicated == pdsRequired->Edt())
 		{
 			return PdsPassThru(mp, exprhdl, pdsRequired, child_index);
 		}
-		return GPOS_NEW(mp) CDistributionSpecGeneralReplicated();
+		return GPOS_NEW(mp) CDistributionSpecReplicated(CDistributionSpecReplicated::EReplicatedType::ErtGeneral);
 	}
 
 	if (1 == child_index)
@@ -301,7 +300,7 @@ CPhysicalJoin::PdsRequired(CMemoryPool *mp, CExpressionHandle &exprhdl,
 		}
 
 		// otherwise, require inner child to be replicated
-		return GPOS_NEW(mp) CDistributionSpecGeneralReplicated();
+		return GPOS_NEW(mp) CDistributionSpecReplicated(CDistributionSpecReplicated::EReplicatedType::ErtGeneral);
 	}
 
 	// no distribution requirement on the outer side
@@ -325,7 +324,7 @@ CPhysicalJoin::PdsDerive(CMemoryPool *mp, CExpressionHandle &exprhdl) const
 
 	CDistributionSpec *pds;
 
-	if (CDistributionSpec::EdtReplicated == pdsOuter->Edt() ||
+	if (CDistributionSpec::EdtStrictReplicated == pdsOuter->Edt() ||
 		CDistributionSpec::EdtUniversal == pdsOuter->Edt())
 	{
 		// if outer is replicated/universal, return inner distribution
@@ -983,7 +982,7 @@ CPhysicalJoin::Edm(CReqdPropPlan *,	 // prppInput
 	CDistributionSpec::EDistributionType edtPrevChild =
 		CDrvdPropPlan::Pdpplan((*pdrgpdpCtxt)[0])->Pds()->Edt();
 
-	if (CDistributionSpec::EdtReplicated == edtPrevChild ||
+	if (CDistributionSpec::EdtStrictReplicated == edtPrevChild ||
 		CDistributionSpec::EdtUniversal == edtPrevChild)
 	{
 		// if previous child is replicated or universal, we use
