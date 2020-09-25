@@ -15,6 +15,7 @@
 #include "gpopt/base/CUtils.h"
 #include "gpopt/base/CCastUtils.h"
 #include "gpopt/base/CDistributionSpecAny.h"
+#include "gpopt/base/CDistributionSpecStrictReplicated.h"
 #include "gpopt/base/CDistributionSpecReplicated.h"
 
 #include "naucrates/md/IMDScalarOp.h"
