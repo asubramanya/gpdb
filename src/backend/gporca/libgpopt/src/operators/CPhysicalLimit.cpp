@@ -167,7 +167,6 @@ CPhysicalLimit::Ped
 	CDrvdPropArray * /* pdrgpdpCtxt */,
 	ULONG /* ulDistrReq */
 	)
->>>>>>> Change physical limit to use the new interface
 {
 	GPOS_ASSERT(0 == child_index);
 

@@ -40,6 +40,8 @@ CDistributionSpecUniversal::FSatisfies(const CDistributionSpec *pds) const
 		return false;
 	}
 
+    return true;
+}
 	BOOL CDistributionSpecUniversal::Matches(const CDistributionSpec *pds) const
 	{
 		// universal distribution needs to match replicated / singleton requests
@@ -55,17 +57,6 @@ BOOL
 CDistributionSpecUniversal::FRequirable() const
 {
 	return false;
-}
-
-BOOL
-CDistributionSpecUniversal::Matches(const CDistributionSpec *pds) const
-{
-	// universal distribution needs to match replicated / singleton requests
-	// to avoid generating duplicates
-	EDistributionType edt = pds->Edt();
-	return (CDistributionSpec::EdtUniversal == edt ||
-			CDistributionSpec::EdtSingleton == edt ||
-			CDistributionSpec::EdtReplicated == edt);
 }
 
 void
