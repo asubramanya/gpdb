@@ -487,10 +487,12 @@ CPhysicalAgg::PdsDerive(CMemoryPool *mp, CExpressionHandle &exprhdl) const
 	}
 	else if (CDistributionSpec::EdtStrictReplicated == pds->Edt())
 	{
-		// Aggregate functions cannot guarantee replicated data. If the child
+		// Aggregate functions which are not trivial and which are sensitive to
+		// the order of their input cannot guarantee replicated data. If the child
 		// was replicated, we can no longer guarantee that property. Therefore
 		// we must now dervive tainted replicated.
-		return GPOS_NEW(mp) CDistributionSpecReplicated(CDistributionSpecReplicated::EReplicatedType::ErtTainted);
+		return GPOS_NEW(mp) CDistributionSpecReplicated(
+			CDistributionSpec::EdtTaintedReplicated);
 	}
 
 	pds->AddRef();

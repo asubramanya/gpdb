@@ -148,20 +148,22 @@ CPhysicalLimit::PosRequired(CMemoryPool *,		  // mp
 
 CDistributionSpec *
 CPhysicalLimit::PdsRequired(CMemoryPool *, CExpressionHandle &,
-							CDistributionSpec *, ULONG ,
-							CDrvdPropArray *, ULONG ) const
+							CDistributionSpec *, ULONG, CDrvdPropArray *,
+							ULONG) const
 {
 	// FIXME: this method will (and should) _never_ be called
 	// sweep through all 38 overrides of PdsRequired and switch to Ped()
-	std::terminate();
+	GPOS_RAISE(
+		CException::ExmaInvalid, CException::ExmiInvalid,
+		GPOS_WSZ_LIT("PdsRequired should not be called for CPhysicalLimit"));
 	return nullptr;
 }
 
 CEnfdDistribution *
 CPhysicalLimit::Ped(CMemoryPool *mp, CExpressionHandle &exprhdl,
 					CReqdPropPlan *prppInput, ULONG child_index,
-					CDrvdPropArray *, // pdrgpdpCtxt
-					ULONG // ulDistrReq
+					CDrvdPropArray *,  // pdrgpdpCtxt
+					ULONG			   // ulDistrReq
 )
 {
 	GPOS_ASSERT(0 == child_index);
@@ -173,9 +175,9 @@ CPhysicalLimit::Ped(CMemoryPool *mp, CExpressionHandle &exprhdl,
 		// TODO:  - Mar 19, 2012; Cleanup: move this check to the caller
 		if (exprhdl.HasOuterRefs())
 		{
-			return GPOS_NEW(mp)
-				CEnfdDistribution(PdsPassThru(mp, exprhdl, pdsInput, child_index),
-								  CEnfdDistribution::EdmSatisfy);
+			return GPOS_NEW(mp) CEnfdDistribution(
+				PdsPassThru(mp, exprhdl, pdsInput, child_index),
+				CEnfdDistribution::EdmSatisfy);
 		}
 
 		CExpression *pexprOffset =
@@ -194,17 +196,20 @@ CPhysicalLimit::Ped(CMemoryPool *mp, CExpressionHandle &exprhdl,
 
 			return GPOS_NEW(mp) CEnfdDistribution(
 				GPOS_NEW(mp) CDistributionSpecAny(this->Eopid()),
-				CEnfdDistribution::EdmSatisfy
-			);
+				CEnfdDistribution::EdmSatisfy);
 		}
 		if (CDistributionSpec::EdtSingleton == pdsInput->Edt())
 		{
 			// pass through input distribution if it is a singleton (and it has count or offset)
-			return GPOS_NEW(mp) CEnfdDistribution(PdsPassThru(mp, exprhdl, pdsInput, child_index), CEnfdDistribution::EdmSatisfy);
+			return GPOS_NEW(mp) CEnfdDistribution(
+				PdsPassThru(mp, exprhdl, pdsInput, child_index),
+				CEnfdDistribution::EdmSatisfy);
 		}
 
 		// otherwise, require a singleton explicitly
-		return GPOS_NEW(mp) CEnfdDistribution(GPOS_NEW(mp) CDistributionSpecSingleton(), CEnfdDistribution::EdmSatisfy);
+		return GPOS_NEW(mp)
+			CEnfdDistribution(GPOS_NEW(mp) CDistributionSpecSingleton(),
+							  CEnfdDistribution::EdmSatisfy);
 	}
 
 	// if expression has to execute on a single host then we need a gather
@@ -362,8 +367,7 @@ CPhysicalLimit::PosDerive(CMemoryPool *,	   // mp
 //
 //---------------------------------------------------------------------------
 CDistributionSpec *
-CPhysicalLimit::PdsDerive(CMemoryPool *mp,
-						  CExpressionHandle &exprhdl) const
+CPhysicalLimit::PdsDerive(CMemoryPool *mp, CExpressionHandle &exprhdl) const
 {
 	CDistributionSpec *pdsOuter = exprhdl.Pdpplan(0)->Pds();
 
@@ -375,8 +379,9 @@ CPhysicalLimit::PdsDerive(CMemoryPool *mp,
 		//   SELECT * FROM foo WHERE a<>1 LIMIT 1;
 		//
 		// In this case, if the child was replicated, we can no longer
-		// guarantee that property and must now dervive tainted replicated.
-		return GPOS_NEW(mp) CDistributionSpecReplicated(CDistributionSpecReplicated::EReplicatedType::ErtTainted);
+		// guarantee that property and must now derive tainted replicated.
+		return GPOS_NEW(mp) CDistributionSpecReplicated(
+			CDistributionSpec::EdtTaintedReplicated);
 	}
 	else
 	{

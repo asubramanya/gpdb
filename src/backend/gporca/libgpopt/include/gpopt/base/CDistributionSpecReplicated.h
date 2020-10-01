@@ -25,43 +25,26 @@ class CDistributionSpecReplicated : public CDistributionSpec
 private:
 	CDistributionSpecReplicated(const CDistributionSpecReplicated &) = delete;
 
-public:
-
-	enum class EReplicatedType
-	{
-		ErtStrict,
-		ErtTainted,
-		ErtGeneral,
-		ErtSentinel
-	};
-
-private:
 	// replicated support
-	EReplicatedType m_replicated;
+	CDistributionSpec::EDistributionType m_replicated;
 
 public:
 	// ctor
-	CDistributionSpecReplicated(EReplicatedType replicated_type)
+	CDistributionSpecReplicated(
+		CDistributionSpec::EDistributionType replicated_type)
 		: m_replicated(replicated_type)
 	{
+		GPOS_ASSERT(replicated_type == CDistributionSpec::EdtReplicated ||
+					replicated_type ==
+						CDistributionSpec::EdtTaintedReplicated ||
+					replicated_type == CDistributionSpec::EdtStrictReplicated);
 	}
 
 	// accessor
 	EDistributionType
 	Edt() const override
 	{
-		switch (m_replicated)
-		{
-			case EReplicatedType::ErtGeneral:
-				return CDistributionSpec::EdtReplicated;
-			case EReplicatedType::ErtTainted:
-				return CDistributionSpec::EdtTaintedReplicated;
-			case EReplicatedType::ErtStrict:
-				return CDistributionSpec::EdtStrictReplicated;
-			default:
-				GPOS_ASSERT(!"Replicated type must be General, Tainted, or Strict");
-				return CDistributionSpec::EdtSentinel;
-		}
+		return m_replicated;
 	}
 
 	// does this distribution satisfy the given one
@@ -71,11 +54,6 @@ public:
 	void AppendEnforcers(CMemoryPool *mp, CExpressionHandle &exprhdl,
 						 CReqdPropPlan *prpp, CExpressionArray *pdrgpexpr,
 						 CExpression *pexpr) override;
-
-	EReplicatedType Ert() const
-	{
-		return m_replicated;
-	}
 
 	// return distribution partitioning type
 	EDistributionPartitioningType
@@ -100,7 +78,8 @@ public:
 				os << "STRICT REPLICATED";
 				break;
 			default:
-				GPOS_ASSERT(!"Replicated type must be General, Tainted, or Strict");
+				GPOS_ASSERT(
+					!"Replicated type must be General, Tainted, or Strict");
 		}
 		return os;
 	}
