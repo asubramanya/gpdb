@@ -719,7 +719,7 @@ CPhysicalHashJoin::PdsRequired(
 ) const
 {
 	std::terminate();
-	return nullptr;
+	return NULL;
 }
 
 CEnfdDistribution *

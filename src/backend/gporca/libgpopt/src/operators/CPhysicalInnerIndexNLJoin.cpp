@@ -94,7 +94,7 @@ CPhysicalInnerIndexNLJoin::PdsRequired(CMemoryPool *mp GPOS_UNUSED,
 ) const
 {
 	std::terminate();
-	return nullptr;
+	return NULL;
 }
 
 CEnfdDistribution *

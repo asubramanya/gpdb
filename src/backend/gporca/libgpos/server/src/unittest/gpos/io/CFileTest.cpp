@@ -262,7 +262,6 @@ CFileTest::Unittest_MkTmpFile(CHAR *szTmpDir, CHAR *szTmpFile)
 
 	// unique temporary file name
 	strTmpFile.AppendFormat("%s%s", szDir, szFile);
-
 }
 
 

@@ -63,7 +63,7 @@ CPhysicalFullMergeJoin::PdsRequired(CMemoryPool *mp GPOS_UNUSED,
 									ULONG ulOptReq GPOS_UNUSED) const
 {
 	std::terminate();
-	return nullptr;
+	return NULL;
 }
 
 CEnfdDistribution *

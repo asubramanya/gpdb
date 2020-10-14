@@ -154,7 +154,7 @@ CPhysicalLimit::PdsRequired(CMemoryPool *, CExpressionHandle &,
 	// FIXME: this method will (and should) _never_ be called
 	// sweep through all 38 overrides of PdsRequired and switch to Ped()
 	std::terminate();
-	return nullptr;
+	return NULL;
 }
 
 CEnfdDistribution *

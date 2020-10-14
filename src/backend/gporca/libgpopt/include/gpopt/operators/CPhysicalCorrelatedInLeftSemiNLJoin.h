@@ -118,7 +118,7 @@ public:
 	) const
 	{
 		std::terminate();
-		return nullptr;
+		return NULL;
 	}
 
 	// compute required rewindability of the n-th child
