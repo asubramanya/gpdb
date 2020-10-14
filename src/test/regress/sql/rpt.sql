@@ -362,7 +362,6 @@ DROP TABLE foopart;
 
 -- FIXME: ORCA does not consider this, we need to fix the cases when ORCA
 -- consider this.
-set optimizer = off;
 create table t_hashdist(a int, b int, c int) distributed by (a);
 create table t_replicate_volatile(a int, b int, c int) distributed replicated;
 
@@ -402,7 +401,6 @@ explain (costs off) update t_replicate_volatile set a = random();
 explain (costs off) insert into t_replicate_volatile select * from t_replicate_volatile limit 1;
 explain (costs off) select * from t_hashdist cross join (select * from t_replicate_volatile limit 1) x;
 
-reset optimizer;
 
 -- start_ignore
 drop schema rpt cascade;
