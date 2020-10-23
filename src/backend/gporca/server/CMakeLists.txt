@@ -311,7 +311,7 @@ ReplicatedTableGroupBy ReplicatedJoinPartitionedTable
 ReplicatedTableInClause ReplicatedTableSequenceInsert;
 
 CTaintedReplicatedTest:
-InsertNonSingleton NonSingleton TaintedReplicatedAgg TaintedReplicatedWindowAgg TaintedReplicatedLimit;
+InsertNonSingleton NonSingleton TaintedReplicatedAgg TaintedReplicatedWindowAgg TaintedReplicatedLimit TaintedReplicatedFilter;
 
 CDqaTest:
 NonSplittableAgg DqaHavingMax DqaMax DqaMin DqaSubqueryMax DqaNoRedistribute;
