@@ -65,7 +65,8 @@ public:
 
 	CEnfdDistribution *Ped(CMemoryPool *mp, CExpressionHandle &exprhdl,
 						   CReqdPropPlan *prppInput, ULONG child_index,
-						   CDrvdPropArray *pdrgpdpCtxt, ULONG ulDistrReq) override;
+						   CDrvdPropArray *pdrgpdpCtxt,
+						   ULONG ulDistrReq) override;
 
 	// execution order of children
 	EChildExecOrder

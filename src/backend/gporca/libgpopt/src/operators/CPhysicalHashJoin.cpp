@@ -303,7 +303,9 @@ CPhysicalHashJoin::PdsMatch(CMemoryPool *mp, CDistributionSpec *pds,
 									 ulSourceChildIndex);
 
 		default:
-			GPOS_ASSERT(CDistributionSpec::EdtStrictReplicated == pds->Edt());
+			GPOS_ASSERT(CDistributionSpec::EdtStrictReplicated == pds->Edt() ||
+						CDistributionSpec::EdtTaintedReplicated == pds->Edt());
+
 			if (EceoRightToLeft == eceo)
 			{
 				GPOS_ASSERT(1 == ulSourceChildIndex);
